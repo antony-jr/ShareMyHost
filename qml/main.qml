@@ -1,4 +1,3 @@
-//import related modules
 import QtQuick 2.12
 import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.13
@@ -6,6 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 2.13
 import QtQuick.Controls.Material 2.12
 
+import "./Components" as Components
 
 ApplicationWindow {
     id: root
@@ -16,89 +16,48 @@ ApplicationWindow {
     minimumHeight: 500
     visible: true
 
-    property bool showMainPage: true
+    Material.theme: Material.Light // Use google material design
+
+    /*
+     * These properties are used by some other 
+     * components to navigate through different 
+     * screens in the Application.
+    */
+    property bool showMainPage: true // Default page
     property bool showMountPage: false
     property bool showAboutPage: false
-
-    Material.theme: Material.Light
-
-    menuBar: MenuBar {
-        Menu {
-	    title: qsTr("File")
-            MenuItem {
-                text: qsTr("Exit")
-                onTriggered: Qt.quit();
-	    }
-        }
-	Menu {
-	    title: qsTr("Help")
-	    MenuItem {
-		text: qsTr("Check for Update")
-	    }
-	    MenuItem {
-		text: qsTr("About")
-		onTriggered: {
-			showMainPage = false;
-			showMountPage = false;
-			showAboutPage = true;
-		}
-	    }
-	}
-    }
-
-    GridLayout {
-	id: aboutPage
-	visible: showAboutPage
-	anchors.fill: parent
-	ColumnLayout {
-		Layout.alignment: Qt.AlignHCenter
-		RoundButton {
-			text: "\u2190"
-			highlighted: true
-			onClicked: {
-				showMainPage = true
-				showMountPage = false
-				showAboutPage = false
-			}
-		}
-		
-			RowLayout{
-				Layout.alignment: Qt.AlignHCenter
-				Image {
-				cache: true
-				fillMode: Image.PreserveAspectFit
-				Layout.preferredWidth: 145
-				Layout.preferredHeight: 145
-				source: "qrc:/logo.png"
-				}
-				Image {
-				Layout.alignment: Qt.AlignHCenter
-				cache: true
-				fillMode: Image.PreserveAspectFit
-				Layout.preferredWidth: 136
-				Layout.preferredHeight: 68
-				source: "qrc:/gplv3.png"
-				}
-
-			}
-			Label {
-				text: qsTr("This program is licensed under GNU General Public License.<br>") +
-				      qsTr("Copyright \u00A9 Antony Jr.<br>") +
-				      qsTr("Program Logo by <a href=https://icons8.com>Icons8</a>.<br><br><br>") +
-				      qsTr("Share My Host is a simple program to share your local file(s)<br>")+
-				      qsTr("within your local network. Free and Open Source.<br>")      
-				font.pixelSize: 20
-				wrapMode: Text.WordWrap
-				textFormat: Text.RichText
-				onLinkActivated: Qt.openUrlExternally(link)
-			}
-
-			}
-    }
-
     property bool showAddMountPointDialog: false
     property string locationStr: qsTr("")
 
+    /*
+     * The main Mongoose Server QML bindings. This QML Object is just a wrapper
+     * but it has deep connection to C++ code.
+     *
+     * Properties:
+     *    controlButton -> The id of the button which controls the server,
+     *                     we just change the text and other stuff when 
+     *                     the server starts and closes.
+    */
+    Components.Server {
+	    id: mainServer
+	    controlButton: startStopBtn
+    }
+
+    /* Components.MainMenu is a MenuBar QML Object.
+     * This is a Customized Object which takes a ApplicationWindow.
+     * This expects all the properties on changing pages to be 
+     * present. */
+    menuBar: Components.MainMenu {
+	    id: mainMenu
+	    mainWindow: root
+    }
+
+
+    Components.AboutPage {
+	    id: aboutPage
+	    mainWindow: root
+    }
+    
     FileDialog {
     	id: localFolderDialog;
     	title: "Please select a folder for Mount Point";
@@ -307,8 +266,8 @@ ApplicationWindow {
 			objectName: "startStopBtn"
 			highlighted: true	
 			property bool isClicked : false
+			property string loadText: qsTr("Processing... ")
 			property string beforeText: qsTr("Start Sharing")
-			property string afterText: qsTr("Stop Sharing")
 			
 			Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 			Layout.preferredWidth: 200
@@ -317,12 +276,13 @@ ApplicationWindow {
 			Material.background: Material.Teal
 			onClicked: {
 				isClicked = !isClicked
+				startStopBtn.text = loadText
 				if(isClicked){
-					startStopBtn.text = afterText
-					startStopBtn.Material.background = Material.Red
+					// Start server
+					mainServer.startServer();
 				}else{
-					startStopBtn.text = beforeText
-					startStopBtn.Material.background = Material.Teal
+					// Stop server
+					mainServer.stopServer();
 				}
 			}
 		}

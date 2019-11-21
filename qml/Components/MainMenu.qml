@@ -1,0 +1,28 @@
+import QtQuick 2.12
+import QtQuick.Controls 2.13
+
+MenuBar {
+	property ApplicationWindow mainWindow; 
+        Menu {
+	    title: qsTr("File")
+            MenuItem {
+                text: qsTr("Exit")
+                onTriggered: Qt.quit();
+	    }
+        }
+	Menu {
+	    title: qsTr("Help")
+	    MenuItem {
+		text: qsTr("Check for Update")
+	    }
+	    MenuItem {
+		text: qsTr("About")
+		onTriggered: {
+			mainWindow.showMainPage = false;
+			mainWindow.showMountPage = false;
+			mainWindow.showAboutPage = true;
+		}
+	    }
+        }
+}
+

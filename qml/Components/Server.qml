@@ -12,7 +12,7 @@ MongooseBackend {
        }
 
        onServerStopped: {
-	    controlButton.text = btn.beforeText
+	    controlButton.text = controlButton.beforeText
 	    controlButton.Material.background = Material.Teal	
        }
 

@@ -1,7 +1,6 @@
 INCLUDEPATH += . include
 TEMPLATE = app
 CONFIG += release static
-CONFIG += NO_GUI # For AppImageUpdaterBridge
 TARGET = ShareMyHost
 QT += core network gui widgets qml quickcontrols2
 

@@ -12,15 +12,15 @@
 static void ev_handler(struct mg_connection *c, int ev, void *p) {
   if (ev == MG_EV_HTTP_REQUEST) {
     if(c->user_data != NULL){
-	    MongooseBackendPrivate *p = (MongooseBackendPrivate*)c->user_data;
+	    MongooseBackendPrivate *obj = (MongooseBackendPrivate*)c->user_data;
     }
     
     struct mg_serve_http_opts opts;
 
-    memset(&opts, 0, sizeof(opts);  // Reset all options to defaults
+    memset(&opts, 0, sizeof(opts));  // Reset all options to defaults
     opts.document_root = ".";       // Serve files from the current directory
 
-    mg_serve_http(c, (struct http_message *) ev_data, s_http_server_opts);
+    mg_serve_http(c, (struct http_message *) p, opts);
   }
 }
 

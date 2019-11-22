@@ -4,6 +4,8 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 2.13
 import QtQuick.Controls.Material 2.12
 
+import Core.Clipper 1.0
+
 GridLayout {
 	property ApplicationWindow mainWindow;
 	property Button controlButton : startStopBtn;
@@ -46,13 +48,16 @@ GridLayout {
 
 			Button {
 				id: copyIpBtn
-				objectName: "copyIpBtn"
 				property string beforeText: qsTr("Copy Address")
 
 				Layout.alignment: Qt.AlignHCenter
 				text: beforeText
 				Material.background: Material.Green
-				highlighted: true	
+				highlighted: true
+
+				onClicked: {
+					clipper.clip(mainWindow.serverIp)
+				}	
 			}
 	
 			Button {
@@ -78,5 +83,22 @@ GridLayout {
 			}
 		}
 	} // Close ColumnLayout
+
+	Timer {
+		id: copyTimer
+		interval: 1000
+		repeat: false
+		onTriggered: {
+			copyIpBtn.text = copyIpBtn.beforeText;
+		}
+	}
+
+	Clipper {
+		id: clipper
+		onClipped: {
+			copyIpBtn.text = qsTr("Copied")
+			copyTimer.start();
+		}
+	}
 }
 

@@ -11,7 +11,7 @@ MongooseBackend {
 
 	onServerStarted: {
 	    // Set server address
-	    mainWindow.serverIp = serverAddress
+	    mainWindow.serverIp = "http://" + serverAddress
 
 	    controlButton.text = qsTr("Stop Sharing")
 	    controlButton.Material.background = Material.Red

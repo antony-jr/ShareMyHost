@@ -11,16 +11,16 @@
 
 static void ev_handler(struct mg_connection *c, int ev, void *p) {
   if (ev == MG_EV_HTTP_REQUEST) {
-    struct http_message *hm = (struct http_message *) p;
-
     if(c->user_data != NULL){
 	    MongooseBackendPrivate *p = (MongooseBackendPrivate*)c->user_data;
     }
+    
+    struct mg_serve_http_opts opts;
 
-    // We have received an HTTP request. Parsed request is contained in `hm`.
-    // Send HTTP reply to the client which shows full original request.
-    mg_send_head(c, 200, hm->message.len, "Content-Type: text/plain");
-    mg_printf(c, "%.*s", (int)hm->message.len, hm->message.p);
+    memset(&opts, 0, sizeof(opts);  // Reset all options to defaults
+    opts.document_root = ".";       // Serve files from the current directory
+
+    mg_serve_http(c, (struct http_message *) ev_data, s_http_server_opts);
   }
 }
 

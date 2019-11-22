@@ -76,33 +76,6 @@ GridLayout {
 				}
 			}
 		}
-
-		Button {
-			Layout.alignment: Qt.AlignHCenter
-			text: qsTr("Show Mount Point(s)") 
-			onClicked: {
-				mainWindow.showMainPage = false
-				mainWindow.showMountPage = true
-			}
-		}
-
-		ToolSeparator{ 
-			Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter	
-			orientation: Qt.Horizontal
-		
-		}
-		Pane {
-			Material.elevation: 4
-			Material.background: Material.Orange
-			Layout.alignment: Qt.AlignHCenter
-			Layout.topMargin: 30
-			Text {
-				horizontalAlignment: TextInput.AlignHCenter
-
-				text: qsTr("Click on the 'Start Sharing' button to start the server!\n") +
-				      qsTr("Make sure to add some mount points to access your local file(s).")
-			}
-		}
 	} // Close ColumnLayout
 }
 

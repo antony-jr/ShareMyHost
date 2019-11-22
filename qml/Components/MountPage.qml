@@ -12,28 +12,16 @@ ColumnLayout {
 	visible: mainWindow.showMountPage
 	anchors.fill: parent
 	RowLayout {
-		RoundButton {
-			id: mntBackBtn
-			text: "\u2190"
-			highlighted: true
-			onClicked: {
-				mainWindow.showMainPage = true
-				mainWindow.showMountPage = false
-			}
-		}
-		
+		Layout.leftMargin: 10
 		Text {
+			Layout.alignment: Qt.AlignVCenter
 			id: mntPoinTxt
 			text: qsTr("Mount Point(s)")
 			font.pixelSize: 30
 		}
 
-		ToolSeparator {
-			orientation: Qt.Horizontal
-			Layout.preferredWidth: mainWindow.width - mntBackBtn.width - mntPoinTxt.width - addMountBtn.width - 60
-		}
-
 		Button {
+			Layout.alignment: Qt.AlignVCenter
 			id: addMountBtn
 			objectName: "addMountBtn"
 			text: qsTr("Add Mount Point")

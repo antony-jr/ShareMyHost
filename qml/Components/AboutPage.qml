@@ -13,16 +13,6 @@ GridLayout {
 	anchors.fill: parent
 	ColumnLayout {
 		Layout.alignment: Qt.AlignHCenter
-		RoundButton {
-			text: "\u2190"
-			highlighted: true
-			onClicked: {
-				mainWindow.showMainPage = true
-				mainWindow.showMountPage = false
-				mainWindow.showAboutPage = false
-			}
-		}
-		
 		RowLayout{
 				Layout.alignment: Qt.AlignHCenter
 				Image {

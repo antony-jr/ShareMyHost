@@ -5,7 +5,25 @@ MenuBar {
 	property ApplicationWindow mainWindow; 
         Menu {
 	    title: qsTr("File")
-            MenuItem {
+	    MenuItem {
+                text: qsTr("Dashboard")
+		onTriggered: {
+			mainWindow.showMainPage = true;
+			mainWindow.showMountPage = false;
+			mainWindow.showAboutPage = false;	
+		}
+	    }
+
+	    MenuItem {
+                text: qsTr("Mount Points")
+		onTriggered: {
+			mainWindow.showMainPage = false;
+			mainWindow.showMountPage = true;
+			mainWindow.showAboutPage = false;
+		}
+	    }
+  
+	    MenuItem {
                 text: qsTr("Exit")
                 onTriggered: Qt.quit();
 	    }

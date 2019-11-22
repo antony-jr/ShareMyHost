@@ -25,8 +25,8 @@ GridLayout {
 	
 		TextField {	
 			id: infoLbl
-			property string info: qsTr("HTTPS://192.168.1.3:8080")
-			text: info
+			objectName: "ipInfoLbl"
+			text: qsTr("START THE SERVER FIRST")
 			Layout.preferredWidth: 240
 			Layout.alignment: Qt.AlignHCenter
 			horizontalAlignment: TextInput.AlignHCenter

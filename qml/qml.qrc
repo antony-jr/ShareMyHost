@@ -7,6 +7,7 @@
     <file>Components/MountPage.qml</file>
     <file>Components/MainPage.qml</file>
     <file>Components/MountPointDialog.qml</file> 
+    <file>Components/ErrorDialog.qml</file>
     <file>logo.png</file>
     <file>gplv3.png</file>
     <file>server_on.png</file>

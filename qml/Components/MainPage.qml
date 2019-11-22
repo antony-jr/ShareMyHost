@@ -26,7 +26,7 @@ GridLayout {
 		TextField {	
 			id: infoLbl
 			objectName: "ipInfoLbl"
-			text: qsTr("START THE SERVER FIRST")
+			text: mainWindow.serverIp
 			Layout.preferredWidth: 240
 			Layout.alignment: Qt.AlignHCenter
 			horizontalAlignment: TextInput.AlignHCenter
@@ -64,7 +64,6 @@ GridLayout {
 			id: startStopBtn
 			objectName: "startStopBtn"
 			highlighted: true	
-			property bool isClicked : false
 			property string loadText: qsTr("Processing... ")
 			property string beforeText: qsTr("Start Sharing")
 			
@@ -74,15 +73,8 @@ GridLayout {
 			text: beforeText
 			Material.background: Material.Teal
 			onClicked: {
-				isClicked = !isClicked
 				startStopBtn.text = loadText
-				if(isClicked){
-					// Start server
-					mainServer.startServer();
-				}else{
-					// Stop server
-					mainServer.stopServer();
-				}
+				mainServer.toggleServer();
 			}
 		}
 	} // Close ColumnLayout

@@ -1,6 +1,7 @@
 #ifndef MONGOOSE_BACKEND_HPP_INCLUDED
 #define MONGOOSE_BACKEND_HPP_INCLUDED 
 #include <QObject>
+#include <QString>
 #include <QThread>
 
 class MongooseBackendPrivate;
@@ -15,12 +16,11 @@ class MongooseBackend : public QObject
 public:
     explicit MongooseBackend(QObject *parent = nullptr);
     ~MongooseBackend();
-    Q_INVOKABLE void startServer();
-    Q_INVOKABLE void stopServer();
+    Q_INVOKABLE void toggleServer();
 signals:
-    void serverStarted();
+    void serverStarted(QString serverAddress);
     void serverStopped();
-    void error();
+    void error(QString errorMessage);
 };
 
 #endif

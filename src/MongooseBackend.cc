@@ -19,15 +19,11 @@ MongooseBackend::MongooseBackend(QObject *parent) :
 }
 
 MongooseBackend::~MongooseBackend(){
-	m_Private->stopServer();
+	m_Private->deleteLater();
 	m_Thread.quit();
 	m_Thread.wait();
 }
 
-void MongooseBackend::startServer(){
-	getMethod(m_Private, "startServer(void)").invoke(m_Private, Qt::QueuedConnection);
-}
-
-void MongooseBackend::stopServer(){
-	getMethod(m_Private, "stopServer(void)").invoke(m_Private, Qt::QueuedConnection);
+void MongooseBackend::toggleServer(){
+	getMethod(m_Private, "toggleServer(void)").invoke(m_Private, Qt::QueuedConnection);
 }

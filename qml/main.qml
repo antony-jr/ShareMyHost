@@ -42,8 +42,12 @@ ApplicationWindow {
     property bool showMountPage: false
     property bool showAboutPage: false
     property bool showAddMountPointDialog: false
+    property bool showErrorDialog: false;
     property string locationStr: qsTr("")
     property string serverStatusImg:  "qrc:/server_off.png"
+    property string serverIp: qsTr("START THE SERVER FIRST")
+    property string errorTitle;
+    property string errorMessage;
 
     /* 
      * Folder select dialog box which is used by 
@@ -79,7 +83,12 @@ ApplicationWindow {
 	fileDialog: localFolderDialog
     }
     /* -- MountPointDialog -- */
-    
+
+    Components.ErrorDialog {
+	id: errorDialog
+	mainWindow: root
+    }
+
     /* All the Pages. */
     Components.AboutPage {
 	id: aboutPage

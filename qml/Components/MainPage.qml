@@ -14,6 +14,15 @@ GridLayout {
 	ColumnLayout {
 		Layout.column: 0
 		Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+		Image {
+			Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter 
+			cache: true
+			fillMode: Image.PreserveAspectFit
+			Layout.preferredWidth: 100
+			Layout.preferredHeight: 100
+			source: mainWindow.serverStatusImg
+		}
+	
 		TextField {	
 			id: infoLbl
 			property string info: qsTr("HTTPS://192.168.1.3:8080")
@@ -28,7 +37,7 @@ GridLayout {
 		Text {
 			text: 
 			qsTr("We are currently using the above address to host your file(s).")
-			font.pixelSize: 15
+			font.pixelSize: 12
 			Layout.alignment: Qt.AlignHCenter
 		}	
 		RowLayout {

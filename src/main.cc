@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QIcon>
@@ -7,9 +7,9 @@
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
-    QGuiApplication::setOrganizationName("ShareMyHost");
-    QGuiApplication::setApplicationName("ShareMyHost");
+    QApplication app(argc, argv);
+    QApplication::setOrganizationName("ShareMyHost");
+    QApplication::setApplicationName("ShareMyHost");
 
     qmlRegisterType<MongooseBackend>("Core.MongooseBackend", 1, 0, "MongooseBackend");
 

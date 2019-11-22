@@ -11,8 +11,21 @@ GridLayout {
 
 	visible: mainWindow.showAboutPage
 	anchors.fill: parent
+	anchors.top: parent.top
+	anchors.left: parent.left
+	anchors.right: parent.right
+	anchors.bottom: parent.bottom
+	columns: 1
+        rows: 1
+
+
 	ColumnLayout {
-		Layout.alignment: Qt.AlignHCenter
+	      	Layout.preferredWidth: parent.width - 100
+	    	Layout.preferredHeight: parent.height - 50
+	    	Layout.row: 0
+	    	Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+	    	Layout.topMargin: 10
+
 		RowLayout{
 				Layout.alignment: Qt.AlignHCenter
 				Image {
@@ -32,17 +45,19 @@ GridLayout {
 				}
 
 		}
-		Label {
-				text: qsTr("This program is licensed under GNU General Public License.<br>") +
-				      qsTr("Copyright \u00A9 Antony Jr.<br>") +
-				      qsTr("Program Logo by <a href=https://icons8.com>Icons8</a>.<br><br><br>") +
-				      qsTr("Share My Host is a simple program to share your local file(s)<br>")+
-				      qsTr("within your local network. Free and Open Source.<br>")      
-				font.pixelSize: 20
-				wrapMode: Text.WordWrap
-				textFormat: Text.RichText
-				onLinkActivated: Qt.openUrlExternally(link)
-		}
 
+		Label {
+			Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+			Layout.preferredWidth: parent.width - 100
+			horizontalAlignment: Qt.AlignHCenter
+			verticalAlignment: Qt.AlignTop
+			text: qsTr("This program is licensed under GNU General Public License.<br>") +
+			      qsTr("Copyright \u00A9 Antony Jr.<br>") +
+			      qsTr("All Icons(except GPL logo) by <a href=https://icons8.com>Icons8</a>.<br>")
+			font.pixelSize: 14
+			wrapMode: Text.WordWrap
+			textFormat: Text.RichText
+			onLinkActivated: Qt.openUrlExternally(link)
+		}
 	}
 }

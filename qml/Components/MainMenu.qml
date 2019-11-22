@@ -31,9 +31,6 @@ MenuBar {
 	Menu {
 	    title: qsTr("Help")
 	    MenuItem {
-		text: qsTr("Check for Update")
-	    }
-	    MenuItem {
 		text: qsTr("About")
 		onTriggered: {
 			mainWindow.showMainPage = false;

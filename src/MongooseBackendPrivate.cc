@@ -23,7 +23,8 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
 
 MongooseBackendPrivate::MongooseBackendPrivate(QObject *parent) :
     QObject(parent),
-    b_StopRequested(false)
+    b_StopRequested(false),
+    b_Running(false)
 {
 }
 
@@ -32,6 +33,12 @@ MongooseBackendPrivate::~MongooseBackendPrivate(){
 
 void MongooseBackendPrivate::startServer(){
 	struct mg_mgr mgr;
+	if(b_Running){
+		emit serverStarted();
+		return;
+	}
+	b_Running = true;
+
 	mg_mgr_init(&mgr, NULL);
 	struct mg_connection *c = NULL;
 	c = mg_bind(&mgr, s_http_port, ev_handler);
@@ -48,7 +55,7 @@ void MongooseBackendPrivate::startServer(){
 		mg_mgr_poll(&mgr, 1000);
 		QCoreApplication::processEvents();
 		if(b_StopRequested){
-			b_StopRequested = false;
+			b_StopRequested = b_Running = false;
 			break;
 		}
 	}

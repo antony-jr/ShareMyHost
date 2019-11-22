@@ -9,5 +9,7 @@
     <file>Components/MountPointDialog.qml</file> 
     <file>logo.png</file>
     <file>gplv3.png</file>
+    <file>server_on.png</file>
+    <file>server_off.png</file>
 </qresource>
 </RCC>

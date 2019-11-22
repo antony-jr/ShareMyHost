@@ -1,4 +1,5 @@
 import QtQuick 2.12
+import QtQuick.Window 2.0
 import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.13
 import QtQuick.Controls.Styles 1.4
@@ -12,10 +13,16 @@ ApplicationWindow {
     title: qsTr("Share My Host")
     width: 800
     height: 500
-    minimumWidth: 500
-    minimumHeight: 500
+    minimumWidth: 400
+    minimumHeight: 400
     visible: true
     Material.theme: Material.Light // Use google material design
+    
+    Component.onCompleted: {
+        setX(Screen.width / 2 - width / 2);
+        setY(Screen.height / 2 - height / 2);
+    }
+    
     
     /* Components.MainMenu is a MenuBar QML Object.
      * This is a Customized Object which takes a ApplicationWindow.
@@ -36,6 +43,7 @@ ApplicationWindow {
     property bool showAboutPage: false
     property bool showAddMountPointDialog: false
     property string locationStr: qsTr("")
+    property string serverStatusImg:  "qrc:/server_off.png"
 
     /* 
      * Folder select dialog box which is used by 
@@ -81,6 +89,7 @@ ApplicationWindow {
     Components.MountPage {
 	id: mountPage
 	mainWindow: root
+	listModel: mountPageListModel
     }
 
     Components.MainPage {
@@ -88,6 +97,11 @@ ApplicationWindow {
 	mainWindow: root
     }
     // -- End All Pages -- 
+
+    ListModel {
+	    id: mountPageListModel
+	    objectName: "mountPageListModel"
+    }
 
     /*
      * The main Mongoose Server QML bindings. This QML Object is just a wrapper
@@ -101,5 +115,6 @@ ApplicationWindow {
     Components.Server {
         id: mainServer
         controlButton: mainPage.controlButton
+	mainWindow: root
     }
 }

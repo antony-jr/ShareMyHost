@@ -7,6 +7,7 @@ class MongooseBackendPrivate : public QObject
 {
     Q_OBJECT
     bool b_StopRequested;
+    bool b_Running;
 public:
     explicit MongooseBackendPrivate(QObject *parent = nullptr);
     ~MongooseBackendPrivate();

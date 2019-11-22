@@ -6,84 +6,85 @@ import QtQuick.Controls 2.13
 import QtQuick.Controls.Material 2.12
 
 
-ColumnLayout {
+GridLayout {
 	property ApplicationWindow mainWindow;
+	property ListModel listModel;
 
 	visible: mainWindow.showMountPage
 	anchors.fill: parent
-	RowLayout {
-		Layout.leftMargin: 10
-		Text {
-			Layout.alignment: Qt.AlignVCenter
-			id: mntPoinTxt
-			text: qsTr("Mount Point(s)")
-			font.pixelSize: 30
-		}
-
-		Button {
-			Layout.alignment: Qt.AlignVCenter
-			id: addMountBtn
-			objectName: "addMountBtn"
-			text: qsTr("Add Mount Point")
-			onClicked: {
-				mainWindow.showAddMountPointDialog = true
-			}
-		}
-	}
+	anchors.top: parent.top
+	anchors.left: parent.left
+	anchors.right: parent.right
+	anchors.bottom: parent.bottom
+	columns: 1
+        rows: 2	
 
 	Pane {
-		id: mountPointsPane
-		objectName: "mountPointsPane"
-		Layout.leftMargin: 55
-		Layout.preferredWidth: mainWindow.width - 100
-		Layout.preferredHeight: mainWindow.height - 130
-		ColumnLayout {
-			ScrollView {
-				width: mainWindow.width - 100
-				height: mainWindow.height - 150
+	    Material.elevation: 4
+	    Layout.preferredWidth: parent.width - 100
+	    Layout.preferredHeight: parent.height - controls.height - 50
+	    Layout.row: 0
+	    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+	    Layout.topMargin: 10
 
-                ListView {
-                    id: mountPointsListView
-                    objectName: "mountPointsListView"
-                    width: mainWindow.width - 100
-                    height: mainWindow.height - 150
-/*
-                    model: ListModel {
-                        ListElement {
-                            remote: "/Anime"
-                            local: "/home/antonyjr/Anime"
-                        }
-                    }
-*/
+	    ScrollView {
+		    width: parent.width - 10
+		    height: parent.height - 60
+		    ScrollBar.vertical.policy: ScrollBar.AlwaysOn
 
-                    delegate: RowLayout {
-                        spacing: 0
-                        Pane {
-                            Material.background: Material.Orange
-                            Text {
-                                text: remote
-                                font.pixelSize: 15
-                            }
-                        }
+		    ListView {
+			    id: mountPointList
+			    width: parent.width
+			    height: parent.height 
 
-                        Pane {
-                            Material.background: Material.Blue
-                            Text {
-                                text: "\u21B9"
-                                font.pixelSize: 15
-                            }
-                        }
+			    model: listModel
 
-                        Pane {
-                            Material.background: Material.Red
-                            Text {
-                                text: local
-                                font.pixelSize: 15
-                            }
-                        }
-			        }
-                } // Close ListView 
-            } // Close ScrollView
-        } // Close Pane.ColumnLayout
-	} // Close Pane
-} // Close main ColumnLayout
+			    delegate: RowLayout {
+			       width: parent.width - 10
+			       Text {
+				       Layout.alignment: Qt.AlignLeft
+				       text: name
+				       font.pixelSize: 16
+			       }
+
+			       RowLayout {  
+				       Layout.rightMargin: 10
+		               	       Layout.alignment: Qt.AlignRight	       
+			       	       RoundButton {
+				       		Material.background: Material.Blue
+				       		text: "\u2139"
+			       	       }
+				       
+				       RoundButton {
+				       		Material.background: Material.Red
+				       		text: "\u00D7"
+			       	       }
+		               }
+		    	    } // Close delegate property
+		    } // Close ListView
+	    } // Close ScrollView
+        } // Close Pane
+
+	ColumnLayout {
+	    id: controls
+	    Layout.preferredWidth: parent.width - 50
+	    Layout.row: 1
+	    Layout.bottomMargin: 20
+	    Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom	    
+	    ToolSeparator {
+		    Layout.preferredWidth: parent.width / 2
+		    Layout.alignment: Qt.AlignHCenter
+		    orientation: Qt.Horizontal
+	    }
+	    
+	    Button {
+		    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+		    id: addMountBtn
+		    objectName: "addMountBtn"
+		    text: qsTr("Add Mount Point")
+		    onClicked: {
+			mainWindow.showAddMountPointDialog = true
+		    }
+	    }
+       } // Close ColumnLayout 
+} // Close main GridLayout

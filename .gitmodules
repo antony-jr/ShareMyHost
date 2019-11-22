@@ -1,3 +1,0 @@
-[submodule "lib/AppImageUpdaterBridge"]
-	path = lib/AppImageUpdaterBridge
-	url = https://github.com/antony-jr/AppImageUpdaterBridge

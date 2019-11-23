@@ -9,12 +9,11 @@ import Core.MongooseBackend 1.0
 
 Dialog {
     property FileDialog fileDialog;
-    property ApplicationWindow mainWindow;
     property string location: "";
     property TextField mountPointTextField: mountPointTxt;
     property MongooseBackend server;
 
-    // visible: mainWindow.showAddMountPointDialog
+    visible: false;
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     title: "Add Mount Point"
@@ -50,7 +49,6 @@ Dialog {
     standardButtons: StandardButton.Ok | StandardButton.Cancel
     onAccepted: {
 	    visible = false;
-	    // mainWindow.showAddMountPointDialog = false
 	    if(locationTxt.text != ""  && 
 	       mountPointTxt.text != ""){
 		      server.addMountPoint(mountPointTxt.text, locationTxt.text);
@@ -59,7 +57,6 @@ Dialog {
     }
     onRejected: {
 	    visible = false;
-	    // mainWindow.showAddMountPointDialog = false
     }
 }
 

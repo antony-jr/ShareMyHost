@@ -44,7 +44,6 @@ ApplicationWindow {
     property bool showMainPage: true // Default page
     property bool showMountPage: false
     property bool showAboutPage: false
-    property bool showAddMountPointDialog: false
     property bool showErrorDialog: false;
     property string locationStr: qsTr("")
     property string serverStatusImg:  "qrc:/server_off.png"
@@ -82,7 +81,6 @@ ApplicationWindow {
      */
     Components.MountPointDialog {
 	id: mountPointDialog
-	mainWindow: root
 	fileDialog: localFolderDialog
 	server: mainServer
     }

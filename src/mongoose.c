@@ -5,6 +5,15 @@
 /*
  * Copyright (c) 2014 Cesanta Software Limited
  * All rights reserved
+ *
+ * --- 
+ *  Modified mg_connection structure to have a string which has the original uri
+ *  from the http client.
+ *  Modified mg_print_dir_entry which uses the original uri string if present from the 
+ *  mg_connection structure to append to the href link when adding it in the 
+ *  directory listing html code.
+ *
+ *  Modification is on Line: 7918 
  */
 
 #ifndef CS_MONGOOSE_SRC_INTERNAL_H_

@@ -87,7 +87,6 @@ GridLayout {
 			 dialog.location = "";
 	                 dialog.mountPointTextField.text = "";
 			 dialog.visible = true;
-			 // mainWindow.showAddMountPointDialog = true
 		    }
 	    }
        } // Close ColumnLayout 

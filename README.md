@@ -74,6 +74,11 @@ You can also tweet about me on twitter , get connected with me [@antonyjr0](http
 
 Thank You! :smiley_cat:
 
+# Icons
+
+All icons used in this program except the GPLV3 logo has been made by [Icons8](https://icons8.com). 
+
+
 # License
 
 The GNU General Public License V3.

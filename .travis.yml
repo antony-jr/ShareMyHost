@@ -20,7 +20,7 @@ script:
   - wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
   - wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
   - chmod +x linuxdeploy*.AppImage
-  - ./linuxdeploy-x86_64.AppImage --appdir AppDir -e ShareMyHost -i appdir/usr/share/icons/hicolor/256x256/apps/ShareMyHost.png -d ShareMyHost.desktop --plugin qt --output appimage
+  - ./linuxdeploy-x86_64.AppImage --appdir appdir -e ShareMyHost -i appdir/usr/share/icons/hicolor/256x256/apps/ShareMyHost.png -d ShareMyHost.desktop --plugin qt --output appimage
 
 after_success:
   - wget "https://github.com/probonopd/uploadtool/raw/master/upload.sh"

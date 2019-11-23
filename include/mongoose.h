@@ -3988,7 +3988,8 @@ struct mg_connection {
   struct mg_connection *next, *prev; /* mg_mgr::active_connections linkage */
   struct mg_connection *listener;    /* Set only for accept()-ed connections */
   struct mg_mgr *mgr;                /* Pointer to containing manager */
-
+  
+  char *orig_uri; /* A little hack to use mount points with http server. */
   sock_t sock; /* Socket to the remote peer */
   int err;
   union socket_address sa; /* Remote peer address */

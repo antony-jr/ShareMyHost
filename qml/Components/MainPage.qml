@@ -62,7 +62,12 @@ GridLayout {
 	
 			Button {
 				text: qsTr("Open in Browser")
-				onClicked: Qt.openUrlExternally(infoLbl.text)
+				onClicked: {
+					if(infoLbl.text == qsTr("START THE SERVER FIRST")){
+						return
+					}
+					Qt.openUrlExternally(infoLbl.text)
+				}
 			}
 		}
 		Button {

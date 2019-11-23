@@ -12,5 +12,7 @@
     <file>gplv3.png</file>
     <file>server_on.png</file>
     <file>server_off.png</file>
+    <file>index_a.html</file>
+    <file>index_b.html</file>
 </qresource>
 </RCC>

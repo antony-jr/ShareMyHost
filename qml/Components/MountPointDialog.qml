@@ -5,12 +5,16 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 2.13
 import QtQuick.Controls.Material 2.12
 
+import Core.MongooseBackend 1.0
+
 Dialog {
     property FileDialog fileDialog;
     property ApplicationWindow mainWindow;
-    property string location;
+    property string location: "";
+    property TextField mountPointTextField: mountPointTxt;
+    property MongooseBackend server;
 
-    visible: mainWindow.showAddMountPointDialog
+    // visible: mainWindow.showAddMountPointDialog
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
     title: "Add Mount Point"
@@ -20,6 +24,7 @@ Dialog {
 		ColumnLayout {
 			Layout.alignment: Qt.AlignHCenter
 			TextField {
+				validator: RegExpValidator { regExp: /^\w+$/ }
 				id: mountPointTxt
 				Layout.preferredWidth: 300
 				horizontalAlignment: Qt.AlignHCenter
@@ -31,6 +36,7 @@ Dialog {
 				horizontalAlignment: Qt.AlignHCenter
 				text: location
 				placeholderText: qsTr("Location")		
+				readOnly: true
 			}
 
 			Button {
@@ -43,16 +49,17 @@ Dialog {
 	}
     standardButtons: StandardButton.Ok | StandardButton.Cancel
     onAccepted: {
-	    mainWindow.showAddMountPointDialog = false
-	    /*
-	    if(locationTxt.text == ""  || 
-	       mountPointTxt.text == ""){
-
+	    visible = false;
+	    // mainWindow.showAddMountPointDialog = false
+	    if(locationTxt.text != ""  && 
+	       mountPointTxt.text != ""){
+		      server.addMountPoint(mountPointTxt.text, locationTxt.text);
 	    }
-	    */
+
     }
     onRejected: {
-	    mainWindow.showAddMountPointDialog = false
+	    visible = false;
+	    // mainWindow.showAddMountPointDialog = false
     }
 }
 

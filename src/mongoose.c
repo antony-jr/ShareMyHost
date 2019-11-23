@@ -7884,6 +7884,7 @@ static void mg_print_dir_entry(struct mg_connection *nc, const char *file_name,
   int is_dir = S_ISDIR(stp->st_mode);
   const char *slash = is_dir ? "/" : "";
   struct mg_str href;
+  size_t orig_uri_len = 0;
 
   if (is_dir) {
     snprintf(size, sizeof(size), "%s", "[DIRECTORY]");
@@ -7905,11 +7906,24 @@ static void mg_print_dir_entry(struct mg_connection *nc, const char *file_name,
   strftime(mod, sizeof(mod), "%d-%b-%Y %H:%M", localtime(&stp->st_mtime));
   mg_escape(file_name, path, sizeof(path));
   href = mg_url_encode(mg_mk_str(file_name));
-  mg_printf_http_chunk(nc,
+  if(nc->orig_uri == NULL){
+	  mg_printf_http_chunk(nc,
                        "<tr><td><a href=\"%s%s\">%s%s</a></td>"
                        "<td>%s</td><td name=%" INT64_FMT ">%s</td></tr>\n",
                        href.p, slash, path, slash, mod, is_dir ? -1 : fsize,
                        size);
+  }else{
+	  orig_uri_len = strlen(nc->orig_uri);
+	  if(nc->orig_uri[orig_uri_len - 1] == '/'){
+		  nc->orig_uri[orig_uri_len - 1] = '\0';
+	  }
+
+	  mg_printf_http_chunk(nc,
+                       "<tr><td><a href=\"%s/%s%s\">%s%s</a></td>"
+                       "<td>%s</td><td name=%" INT64_FMT ">%s</td></tr>\n",
+		       nc->orig_uri , href.p, slash, path, slash, mod, is_dir ? -1 : fsize,
+                       size);
+  }
   free((void *) href.p);
 }
 

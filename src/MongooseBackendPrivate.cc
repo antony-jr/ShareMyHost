@@ -5,22 +5,144 @@
 #include <QThread>
 #include <QNetworkInterface>
 #include <QList>
+#include <QPair>
 #include <QDebug>
+#include <QFile>
+
 
 #include <errno.h>
+#include <assert.h>
 
 static void ev_handler(struct mg_connection *c, int ev, void *p) {
   if (ev == MG_EV_HTTP_REQUEST) {
-    if(c->user_data != NULL){
-	    MongooseBackendPrivate *obj = (MongooseBackendPrivate*)c->user_data;
+    struct http_message *hm = (struct http_message *) p;
+    char *uri = (char*)calloc(hm->uri.len + 1, sizeof *uri);
+    MongooseBackendPrivate *obj = qobject_cast<MongooseBackendPrivate*>((QObject*)c->user_data);
+    if(!uri || !obj){
+	    // send internal server error in case
+	    // we have some trouble allocating space or 
+	    // the user data is not our backend object
+	    mg_http_send_error(c, 500, NULL);
+	    return;
     }
-    
+    strncpy(uri, hm->uri.p, hm->uri.len);
+
     struct mg_serve_http_opts opts;
-
     memset(&opts, 0, sizeof(opts));  // Reset all options to defaults
-    opts.document_root = ".";       // Serve files from the current directory
+   
 
-    mg_serve_http(c, (struct http_message *) p, opts);
+    // Set original uri length to zero for default behaviour of
+    // http serve
+    c->orig_uri =  NULL;
+
+    // Now go through the mount points and 
+    // redirect.
+    QStringList mountPoints = (obj->m_MountPoints).keys();
+    bool mountPointServed = false;
+    for(QString mountPoint : mountPoints){
+	    QByteArray bArray = mountPoint.toLatin1();
+	    const char *mnt = bArray.constData();
+	    auto len = bArray.size();
+
+	    if(!qstrncmp(uri , mnt, len)){
+		   // Now we want to change the uri in the http message
+		   // avoiding the mount point name because its 
+		   // just a pesudo
+		  
+		   // Before we override the original uri we need to 
+		   // store it in the connection struct for later use.
+		   c->orig_uri  = (char *)calloc(hm->uri.len + 1, sizeof(char));
+		   if(!c->orig_uri){
+			   mg_http_send_error(c, 500, NULL);
+			   free(uri);
+			   return;
+		   }
+		   strncpy(c->orig_uri, hm->uri.p, hm->uri.len);
+
+		   if(hm->uri.len ==  len){ // No files directly requested 
+			memset(&hm->uri.p + 1 , 0, hm->uri.len - 1);
+			hm->uri.len = 1;
+		   }else if(hm->uri.len > len){
+			char *past_mnt_point = (char*)
+				calloc(hm->uri.len - len + 1, sizeof(char));
+			if(!past_mnt_point){
+				mg_http_send_error(c, 500, NULL);
+				free(c->orig_uri);
+				free(uri);
+				c->orig_uri = NULL;
+				return;
+			}
+			strncpy(past_mnt_point, hm->uri.p + len, hm->uri.len - len);
+			char *p = past_mnt_point;
+			for(int iter = 0; iter < hm->uri.len ; ++iter){
+				if(iter > hm->uri.len - len){
+					*(((char*)hm->uri.p) + iter) = '\0';
+					continue;
+				}
+				*(((char*)hm->uri.p) + iter) = *p++;
+			}
+			hm->uri.len = strlen(past_mnt_point);
+			free(past_mnt_point);
+		   }
+
+		   QString localFile = (obj->m_MountPoints).value(mountPoint).toString();
+		   
+		   QByteArray localFileByteArray = localFile.toLatin1();
+		   char *root = (char*)calloc(localFileByteArray.size() + 1, sizeof *root);
+		   strncpy(root, localFileByteArray.constData(), localFileByteArray.size());
+		   
+		   opts.document_root = root;
+		   
+		   mg_serve_http(c, hm , opts);
+		   mountPointServed = true;
+		   free(c->orig_uri);
+		   c->orig_uri = NULL;
+		   free(root);
+		   break;
+	    }
+
+    }
+
+    free(uri);
+
+    if(!mountPointServed){
+	    QFile file;
+	    file.setFileName(":/index_a.html");
+	    if(!file.open(QIODevice::ReadOnly)){
+		    mg_http_send_error(c, 500, NULL);	
+		    return;
+	    }
+	   
+	    mg_printf(c, "HTTP/1.1 200 OK\r\n\r\n");
+
+	    while(!file.atEnd()){
+		    QByteArray data = file.read(1024);
+		    mg_printf(c, "%.*s", data.size(), data.constData());
+	    }
+	    file.close();
+
+	    for(QString mountPoint : mountPoints){
+		    mg_printf(c,
+		    "<button type=\"button\" class=\"list-group-item\""
+		    " onclick=\"window.location.href = '%s';\" >%s</button>",
+		    mountPoint.toStdString().c_str(),
+		    mountPoint.toStdString().c_str());
+	    }
+	    
+	    file.setFileName(":/index_b.html");
+	    if(!file.open(QIODevice::ReadOnly)){
+		    mg_http_send_error(c, 500, NULL);	
+		    return;
+	    }
+	    
+	    while(!file.atEnd()){
+		    QByteArray data = file.read(1024);
+		    mg_printf(c, "%.*s", data.size(), data.constData());
+	    }
+	    file.close();
+
+	    c->flags |= MG_F_SEND_AND_CLOSE;
+    }
   }
 }
 
@@ -29,6 +151,8 @@ MongooseBackendPrivate::MongooseBackendPrivate(QObject *parent) :
     b_StopRequested(false),
     b_Running(false)
 {
+	// Get all mount points from settings
+	m_MountPoints = m_Settings.value("MountPoints").toJsonObject();
 }
 
 MongooseBackendPrivate::~MongooseBackendPrivate(){
@@ -43,6 +167,24 @@ void MongooseBackendPrivate::toggleServer(){
 	}
 	startServer();
 }
+
+void MongooseBackendPrivate::addMountPoint(QString mountPoint, QUrl local){
+	mountPoint.prepend("/");
+	if(!m_MountPoints.contains(mountPoint)){
+		m_MountPoints.insert(mountPoint, local.toLocalFile());
+		m_Settings.setValue("MountPoints", m_MountPoints);
+		emit mountPointAdded(mountPoint);
+	}
+}
+
+void MongooseBackendPrivate::removeMountPoint(QString mountPoint){
+	if(m_MountPoints.contains(mountPoint)){
+		m_MountPoints.remove(mountPoint);
+		m_Settings.setValue("MountPoints", m_MountPoints);
+		emit mountPointRemoved(mountPoint);
+	}
+}
+
 
 void MongooseBackendPrivate::startServer(){
 	struct mg_mgr mgr;
@@ -64,7 +206,7 @@ void MongooseBackendPrivate::startServer(){
 		emit error(QString::fromUtf8("Cannot determine local IP"));
 		return;
 	}
-
+	
 	// For now lets only support binding on port 8080
 	// if that fails then we complain to user and 
 	// thats it.
@@ -89,7 +231,7 @@ void MongooseBackendPrivate::startServer(){
 	emit serverStarted(m_Address);
 	
 	for(;;){
-		mg_mgr_poll(&mgr, 1000);
+		mg_mgr_poll(&mgr, 200);
 		QCoreApplication::processEvents();
 		if(b_StopRequested){
 			b_StopRequested = b_Running = false;
@@ -103,4 +245,11 @@ void MongooseBackendPrivate::startServer(){
 
 void MongooseBackendPrivate::stopServer(){
 	b_StopRequested = true;
+}
+
+void MongooseBackendPrivate::getAllMountPoints(){
+	QStringList mountPoints = m_MountPoints.keys();
+	for(QString mountPoint : mountPoints){
+		emit mntPoint(mountPoint);
+	}
 }

@@ -5,10 +5,13 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 2.13
 import QtQuick.Controls.Material 2.12
 
+import Core.MongooseBackend 1.0
 
 GridLayout {
 	property ApplicationWindow mainWindow;
 	property ListModel listModel;
+	property MongooseBackend server;
+	property Dialog dialog;
 
 	visible: mainWindow.showMountPage
 	anchors.fill: parent
@@ -49,15 +52,13 @@ GridLayout {
 
 			       RowLayout {  
 				       Layout.rightMargin: 10
-		               	       Layout.alignment: Qt.AlignRight	       
-			       	       RoundButton {
-				       		Material.background: Material.Blue
-				       		text: "\u2139"
-			       	       }
-				       
+				       Layout.alignment: Qt.AlignRight	      
 				       RoundButton {
 				       		Material.background: Material.Red
-				       		text: "\u00D7"
+						text: "\u00D7"
+						onClicked: {
+							server.removeMountPoint(name)
+						}
 			       	       }
 		               }
 		    	    } // Close delegate property
@@ -83,7 +84,10 @@ GridLayout {
 		    objectName: "addMountBtn"
 		    text: qsTr("Add Mount Point")
 		    onClicked: {
-			mainWindow.showAddMountPointDialog = true
+			 dialog.location = "";
+	                 dialog.mountPointTextField.text = "";
+			 dialog.visible = true;
+			 // mainWindow.showAddMountPointDialog = true
 		    }
 	    }
        } // Close ColumnLayout 

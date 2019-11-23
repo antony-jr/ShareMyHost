@@ -21,6 +21,9 @@ ApplicationWindow {
     Component.onCompleted: {
         setX(Screen.width / 2 - width / 2);
         setY(Screen.height / 2 - height / 2);
+
+	// Also add all mount points from settings
+	mainServer.getAllMountPoints();	
     }
     
     
@@ -81,6 +84,7 @@ ApplicationWindow {
 	id: mountPointDialog
 	mainWindow: root
 	fileDialog: localFolderDialog
+	server: mainServer
     }
     /* -- MountPointDialog -- */
 
@@ -99,6 +103,8 @@ ApplicationWindow {
 	id: mountPage
 	mainWindow: root
 	listModel: mountPageListModel
+	server: mainServer
+	dialog: mountPointDialog
     }
 
     Components.MainPage {
@@ -125,5 +131,6 @@ ApplicationWindow {
         id: mainServer
         controlButton: mainPage.controlButton
 	mainWindow: root
+	listModel: mountPageListModel
     }
 }

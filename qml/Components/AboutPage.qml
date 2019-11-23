@@ -54,7 +54,7 @@ GridLayout {
 			text: qsTr("This program is licensed under GNU General Public License.<br>") +
 			      qsTr("Copyright \u00A9 Antony Jr.<br>") +
 			      qsTr("All Icons(except GPL logo) by <a href=https://icons8.com>Icons8</a>.<br>")
-			font.pixelSize: 14
+			font.pixelSize: 18
 			wrapMode: Text.WordWrap
 			textFormat: Text.RichText
 			onLinkActivated: Qt.openUrlExternally(link)

@@ -1,4 +1,4 @@
-<h1 align="center">AppImage Updater</h1>
+<h1 align="center">Share My Host</h1>
 <p align="center">
     <img src="https://img.shields.io/github/issues/antony-jr/ShareMyHost.svg?style=flat-square" alt="issues" / >
     <img src="https://img.shields.io/github/forks/antony-jr/ShareMyHost.svg?style=flat-square" alt="stars" / >
@@ -30,10 +30,15 @@
 </p>
 
 
-**ShareMyHost** is simple and powerful program written in C++/QML using Google's material 
+**ShareMyHost** is a simple and powerful program written in C++/QML using Google's material 
 design guidelines. It gives a *very simple http server for sharing file(s) within your
 local network*. It uses **mount points** which are sort of like http endpoints with directory
 listing to specific directories in your file system.
+
+For example, You create a **Mount Point**(say /Animes to /home/user/Anime) then you can access
+the directory listing and all its files at ```http://ip:port/Animes``` (Ex: http://192.168.1.3:8080/Animes).
+
+See down below for the usage.
 
 # Usage
 

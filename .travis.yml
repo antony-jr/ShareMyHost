@@ -25,7 +25,7 @@ script:
   - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   - export VERSION=$(git rev-parse --short HEAD)
-  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
+  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop --qmldir=$(qmake -query QT_INSTALL_QML) -bundle-non-qt-libs
   - wget -c -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" 
   - chmod +x appimagetool-x86_64.AppImage
   - ./appimagetool-x86_64.AppImage -u "gh-releases-zsync|antony-jr|ShareMyHost|continuous|ShareMyHost*-x86_64.AppImage.zsync" appdir 

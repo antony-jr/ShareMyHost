@@ -8,6 +8,7 @@
 #include <QPair>
 #include <QDebug>
 #include <QFile>
+#include <QJsonDocument>
 
 
 #include <errno.h>
@@ -152,7 +153,11 @@ MongooseBackendPrivate::MongooseBackendPrivate(QObject *parent) :
     b_Running(false)
 {
 	// Get all mount points from settings
-	m_MountPoints = m_Settings.value("MountPoints").toJsonObject();
+	// Workaround for https://bugreports.qt.io/browse/QTBUG-48313
+	QByteArray json = m_Settings.value("MountPoints").toByteArray();
+	if(!json.isEmpty()){
+		m_MountPoints = (QJsonDocument::fromJson(json)).object();
+	}
 }
 
 MongooseBackendPrivate::~MongooseBackendPrivate(){
@@ -172,7 +177,8 @@ void MongooseBackendPrivate::addMountPoint(QString mountPoint, QUrl local){
 	mountPoint.prepend("/");
 	if(!m_MountPoints.contains(mountPoint)){
 		m_MountPoints.insert(mountPoint, local.toLocalFile());
-		m_Settings.setValue("MountPoints", m_MountPoints);
+		QJsonDocument doc(m_MountPoints);
+		m_Settings.setValue("MountPoints", doc.toJson());
 		emit mountPointAdded(mountPoint);
 	}
 }
@@ -180,7 +186,8 @@ void MongooseBackendPrivate::addMountPoint(QString mountPoint, QUrl local){
 void MongooseBackendPrivate::removeMountPoint(QString mountPoint){
 	if(m_MountPoints.contains(mountPoint)){
 		m_MountPoints.remove(mountPoint);
-		m_Settings.setValue("MountPoints", m_MountPoints);
+		QJsonDocument doc(m_MountPoints);
+		m_Settings.setValue("MountPoints", doc.toJson());
 		emit mountPointRemoved(mountPoint);
 	}
 }

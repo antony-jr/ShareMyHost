@@ -1,5 +1,5 @@
 import QtQuick 2.12
-import QtQuickControls 2.12
+import QtQuick.Controls 2.12
 
 MenuBar {
 	property ApplicationWindow mainWindow; 

@@ -1,7 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls.Styles 1.4
-import QtQuickControls 2.12
+import QtQuick.Controls 2.12
 import QtQuick.Controls.Material 2.12
 
 import Core.Clipper 1.0

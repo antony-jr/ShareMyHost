@@ -17,10 +17,19 @@ script:
   - mkdir -p appdir/usr/bin ; strip ShareMyHost ; cp ShareMyHost appdir/usr/bin/
   - mkdir -p appdir/usr/share/applications ; cp ShareMyHost.desktop appdir/usr/share/applications/
   - mkdir -p appdir/usr/share/icons/hicolor/256x256/apps/ ; cp qml/logo.png appdir/usr/share/icons/hicolor/256x256/apps/ShareMyHost.png
-  - wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-  - wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-  - chmod +x linuxdeploy*.AppImage
-  - ./linuxdeploy-x86_64.AppImage --appdir appdir -e ShareMyHost -i appdir/usr/share/icons/hicolor/256x256/apps/ShareMyHost.png -d ShareMyHost.desktop --plugin qt --output appimage
+  - # wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+  - # wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+  - # chmod +x linuxdeploy*.AppImage
+  - # ./linuxdeploy-x86_64.AppImage --appdir appdir -e ShareMyHost -i appdir/usr/share/icons/hicolor/256x256/apps/ShareMyHost.png -d ShareMyHost.desktop --plugin qt --output appimage
+  - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
+  - export VERSION=$(git rev-parse --short HEAD)
+  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
+  - wget -c -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" 
+  - chmod +x appimagetool-x86_64.AppImage
+  - ./appimagetool-x86_64.AppImage -u "gh-releases-zsync|antony-jr|ShareMyHost|continuous|ShareMyHost*-x86_64.AppImage.zsync" appdir 
+
 
 after_success:
   - wget "https://github.com/probonopd/uploadtool/raw/master/upload.sh"

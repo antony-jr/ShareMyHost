@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=ShareMyHost
+Type=Application
+Exec=ShareMyHost
+Icon=ShareMyHost
+Terminal=false
+Comment=One click to share your files in your local network.

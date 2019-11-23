@@ -4,4 +4,5 @@ Type=Application
 Exec=ShareMyHost
 Icon=ShareMyHost
 Terminal=false
+Categories=Utility;
 Comment=One click to share your files in your local network.

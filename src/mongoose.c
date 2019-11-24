@@ -12,8 +12,10 @@
  *  Modified mg_print_dir_entry which uses the original uri string if present from the 
  *  mg_connection structure to append to the href link when adding it in the 
  *  directory listing html code.
- *
- *  Modification is on Line: 7918 
+ *  
+ *  Also modified the directory listing html to match lighttpd server to friendly towards 
+ *  other http clients which expects us to be a standard http server.
+ *  Modification is on Line: 7967(Modified directory listing) , 7920 (Modified mg_print_dir_entry)
  */
 
 #ifndef CS_MONGOOSE_SRC_INTERNAL_H_
@@ -7896,7 +7898,8 @@ static void mg_print_dir_entry(struct mg_connection *nc, const char *file_name,
   size_t orig_uri_len = 0;
 
   if (is_dir) {
-    snprintf(size, sizeof(size), "%s", "[DIRECTORY]");
+    /*snprintf(size, sizeof(size), "%s", "[DIRECTORY]");*/
+    snprintf(size, sizeof(size), "0.0K");
   } else {
     /*
      * We use (double) cast below because MSVC 6 compiler cannot
@@ -7912,26 +7915,24 @@ static void mg_print_dir_entry(struct mg_connection *nc, const char *file_name,
       snprintf(size, sizeof(size), "%.1fG", (double) fsize / 1073741824);
     }
   }
-  strftime(mod, sizeof(mod), "%d-%b-%Y %H:%M", localtime(&stp->st_mtime));
+  strftime(mod, sizeof(mod), "%Y-%b-%d %H:%M:%S", localtime(&stp->st_mtime));
   mg_escape(file_name, path, sizeof(path));
   href = mg_url_encode(mg_mk_str(file_name));
   if(nc->orig_uri == NULL){
+     
 	  mg_printf_http_chunk(nc,
-                       "<tr><td><a href=\"%s%s\">%s%s</a></td>"
-                       "<td>%s</td><td name=%" INT64_FMT ">%s</td></tr>\n",
-                       href.p, slash, path, slash, mod, is_dir ? -1 : fsize,
-                       size);
-  }else{
+                       "<tr><td class=\"n\"><a href=\"%s%s\">%s%s</a></td>"
+                       "<td class=\"m\">%s</td><td class=\"s\">%s</td><td class=\"t\">application/octet-stream</td></tr>\n",
+                       href.p, slash, path, slash, mod, size);
+	  }else{
 	  orig_uri_len = strlen(nc->orig_uri);
 	  if(nc->orig_uri[orig_uri_len - 1] == '/'){
 		  nc->orig_uri[orig_uri_len - 1] = '\0';
 	  }
-
 	  mg_printf_http_chunk(nc,
-                       "<tr><td><a href=\"%s/%s%s\">%s%s</a></td>"
-                       "<td>%s</td><td name=%" INT64_FMT ">%s</td></tr>\n",
-		       nc->orig_uri , href.p, slash, path, slash, mod, is_dir ? -1 : fsize,
-                       size);
+                       "<tr><td class=\"n\"><a href=\"%s/%s%s\">%s%s</a></td>"
+                       "<td class=\"m\">%s</td><td class=\"s\">%s</td><td class=\"t\">application/octet-stream</td></tr>\n",
+		       nc->orig_uri , href.p, slash, path, slash, mod, size);
   }
   free((void *) href.p);
 }
@@ -7966,55 +7967,211 @@ static void mg_scan_directory(struct mg_connection *nc, const char *dir,
 static void mg_send_directory_listing(struct mg_connection *nc, const char *dir,
                                       struct http_message *hm,
                                       struct mg_serve_http_opts *opts) {
-  static const char *sort_js_code =
-      "<script>function srt(tb, sc, so, d) {"
-      "var tr = Array.prototype.slice.call(tb.rows, 0),"
-      "tr = tr.sort(function (a, b) { var c1 = a.cells[sc], c2 = b.cells[sc],"
-      "n1 = c1.getAttribute('name'), n2 = c2.getAttribute('name'), "
-      "t1 = a.cells[2].getAttribute('name'), "
-      "t2 = b.cells[2].getAttribute('name'); "
-      "return so * (t1 < 0 && t2 >= 0 ? -1 : t2 < 0 && t1 >= 0 ? 1 : "
-      "n1 ? parseInt(n2) - parseInt(n1) : "
-      "c1.textContent.trim().localeCompare(c2.textContent.trim())); });";
-  static const char *sort_js_code2 =
-      "for (var i = 0; i < tr.length; i++) tb.appendChild(tr[i]); "
-      "if (!d) window.location.hash = ('sc=' + sc + '&so=' + so); "
-      "};"
-      "window.onload = function() {"
-      "var tb = document.getElementById('tb');"
-      "var m = /sc=([012]).so=(1|-1)/.exec(window.location.hash) || [0, 2, 1];"
-      "var sc = m[1], so = m[2]; document.onclick = function(ev) { "
-      "var c = ev.target.rel; if (c) {if (c == sc) so *= -1; srt(tb, c, so); "
-      "sc = c; ev.preventDefault();}};"
-      "srt(tb, sc, so, true);"
-      "}"
-      "</script>";
-
   mg_send_response_line(nc, 200, opts->extra_headers);
   mg_printf(nc, "%s: %s\r\n%s: %s\r\n\r\n", "Transfer-Encoding", "chunked",
             "Content-Type", "text/html; charset=utf-8");
-
   mg_printf_http_chunk(
       nc,
-      "<html><head><title>Index of %.*s</title>%s%s"
-      "<style>th,td {text-align: left; padding-right: 1em; "
-      "font-family: monospace; }</style></head>\n"
-      "<body><h1>Index of %.*s</h1>\n<table cellpadding=0><thead>"
-      "<tr><th><a href=# rel=0>Name</a></th><th>"
-      "<a href=# rel=1>Modified</a</th>"
-      "<th><a href=# rel=2>Size</a></th></tr>"
-      "<tr><td colspan=3><hr></td></tr>\n"
+      "<!DOCTYPE html>\n"
+      "<html>\n"
+      "<head>\n"
+      "<title>Index of %.*s</title>\n"
+      "<style type=\"text/css\">\n"
+      "a, a:active {text-decoration: none; color: blue;}\na:visited {color: #48468F;}\na:hover, a:focus {text-decoration: underline; color: red;}\nbody {background-color: #F5F5F5;}\nh2 {margin-bottom: 12px;}\ntable {margin-left: 12px;}\nth, td { font: 90%% monospace; text-align: left;}\nth { font-weight: bold; padding-right: 14px; padding-bottom: 3px;}\ntd {padding-right: 14px;}\ntd.s, th.s {text-align: right;}\ndiv.list { background-color: white; border-top: 1px solid #646464; border-bottom: 1px solid #646464; padding-top: 10px; padding-bottom: 14px;}\ndiv.foot { font: 90%% monospace; color: #787878; padding-top: 4px;}\n"
+      "</style>\n"
+      "</head>\n"
+      "<body>\n"
+      "<h2>Index of %.*s</h2>\n"
+      "<div class=\"list\">\n"
+      "<table summary=\"Directory Listing\" cellpadding=\"0\" cellspacing=\"0\">\n"
+      "<thead><tr><th class=\"n\">Name</th><th class=\"m\">"
+      "Last Modified</th>"
+      "<th class=\"s\">Size</th><th class=\"t\">Type</th></tr>"
       "</thead>\n"
-      "<tbody id=tb>",
-      (int) hm->uri.len, hm->uri.p, sort_js_code, sort_js_code2,
-      (int) hm->uri.len, hm->uri.p);
+      "<tbody>",
+      (int) hm->uri.len, hm->uri.p, (int) hm->uri.len, hm->uri.p);
   mg_scan_directory(nc, dir, opts, mg_print_dir_entry);
   mg_printf_http_chunk(nc,
-                       "</tbody><tr><td colspan=3><hr></td></tr>\n"
+                       "</tbody>\n"
                        "</table>\n"
-                       "<address>%s</address>\n"
-                       "</body></html>",
-                       mg_version_header);
+                       "</div>\n"
+                       "<div class=\"foot\">%s</div>\n"
+"\n"
+"<script type=\"text/javascript\">\n"
+"// <!--\n"
+"\n"
+"var click_column;\n"
+"var name_column = 0;\n"
+"var date_column = 1;\n"
+"var size_column = 2;\n"
+"var type_column = 3;\n"
+"var prev_span = null;\n"
+"\n"
+"if (typeof(String.prototype.localeCompare) === 'undefined') {\n"
+" String.prototype.localeCompare = function(str, locale, options) {\n"
+"   return ((this == str) ? 0 : ((this > str) ? 1 : -1));\n"
+" };\n"
+"}\n"
+"\n"
+"if (typeof(String.prototype.toLocaleUpperCase) === 'undefined') {\n"
+" String.prototype.toLocaleUpperCase = function() {\n"
+"  return this.toUpperCase();\n"
+" };\n"
+"}\n"
+"\n"
+"function get_inner_text(el) {\n"
+" if((typeof el == 'string')||(typeof el == 'undefined'))\n"
+"  return el;\n"
+" if(el.innerText)\n"
+"  return el.innerText;\n"
+" else {\n"
+"  var str = \"\";\n"
+"  var cs = el.childNodes;\n"
+"  var l = cs.length;\n"
+"  for (i=0;i<l;i++) {\n"
+"   if (cs[i].nodeType==1) str += get_inner_text(cs[i]);\n"
+"   else if (cs[i].nodeType==3) str += cs[i].nodeValue;\n"
+"  }\n"
+" }\n"
+" return str;\n"
+"}\n"
+"\n"
+"function isdigit(c) {\n"
+" return (c >= '0' && c <= '9');\n"
+"}\n"
+"\n"
+"function unit_multiplier(unit) {\n"
+" return (unit=='K') ? 1000\n"
+"      : (unit=='M') ? 1000000\n"
+"      : (unit=='G') ? 1000000000\n"
+"      : (unit=='T') ? 1000000000000\n"
+"      : (unit=='P') ? 1000000000000000\n"
+"      : (unit=='E') ? 1000000000000000000 : 1;\n"
+"}\n"
+"\n"
+"var li_date_regex=/(\\d{4})-(\\w{3})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})/;\n"
+"\n"
+"var li_mon = ['Jan','Feb','Mar','Apr','May','Jun',\n"
+"              'Jul','Aug','Sep','Oct','Nov','Dec'];\n"
+"\n"
+"function li_mon_num(mon) {\n"
+" var i; for (i = 0; i < 12 && mon != li_mon[i]; ++i); return i;\n"
+"}\n"
+"\n"
+"function li_date_cmp(s1, s2) {\n"
+" var dp1 = li_date_regex.exec(s1)\n"
+" var dp2 = li_date_regex.exec(s2)\n"
+" for (var i = 1; i < 7; ++i) {\n"
+"  var cmp = (2 != i)\n"
+"   ? parseInt(dp1[i]) - parseInt(dp2[i])\n"
+"   : li_mon_num(dp1[2]) - li_mon_num(dp2[2]);\n"
+"  if (0 != cmp) return cmp;\n"
+" }\n"
+" return 0;\n"
+"}\n"
+"\n"
+"function sortfn_then_by_name(a,b,sort_column) {\n"
+" if (sort_column == name_column || sort_column == type_column) {\n"
+"  var ad = (a.cells[type_column].innerHTML === 'Directory');\n"
+"  var bd = (b.cells[type_column].innerHTML === 'Directory');\n"
+"  if (ad != bd) return (ad ? -1 : 1);\n"
+" }\n"
+" var at = get_inner_text(a.cells[sort_column]);\n"
+" var bt = get_inner_text(b.cells[sort_column]);\n"
+" var cmp;\n"
+" if (sort_column == name_column) {\n"
+"  if (at == '..') return -1;\n"
+"  if (bt == '..') return  1;\n"
+" }\n"
+" if (a.cells[sort_column].className == 'int') {\n"
+"  cmp = parseInt(at)-parseInt(bt);\n"
+" } else if (sort_column == date_column) {\n"
+"  var ad = isdigit(at.substr(0,1));\n"
+"  var bd = isdigit(bt.substr(0,1));\n"
+"  if (ad != bd) return (!ad ? -1 : 1);\n"
+"  cmp = li_date_cmp(at,bt);\n"
+" } else if (sort_column == size_column) {\n"
+"  var ai = parseInt(at, 10) * unit_multiplier(at.substr(-1,1));\n"
+"  var bi = parseInt(bt, 10) * unit_multiplier(bt.substr(-1,1));\n"
+"  if (at.substr(0,1) == '-') ai = -1;\n"
+"  if (bt.substr(0,1) == '-') bi = -1;\n"
+"  cmp = ai - bi;\n"
+" } else {\n"
+"  cmp = at.toLocaleUpperCase().localeCompare(bt.toLocaleUpperCase());\n"
+"  if (0 != cmp) return cmp;\n"
+"  cmp = at.localeCompare(bt);\n"
+" }\n"
+" if (0 != cmp || sort_column == name_column) return cmp;\n"
+" return sortfn_then_by_name(a,b,name_column);\n"
+"}\n"
+"\n"
+"function sortfn(a,b) {\n"
+" return sortfn_then_by_name(a,b,click_column);\n"
+"}\n"
+"\n"
+"function resort(lnk) {\n"
+" var span = lnk.childNodes[1];\n"
+" var table = lnk.parentNode.parentNode.parentNode.parentNode;\n"
+" var rows = new Array();\n"
+" for (j=1;j<table.rows.length;j++)\n"
+"  rows[j-1] = table.rows[j];\n"
+" click_column = lnk.parentNode.cellIndex;\n"
+" rows.sort(sortfn);\n"
+"\n"
+" if (prev_span != null) prev_span.innerHTML = '';\n"
+" if (span.getAttribute('sortdir')=='down') {\n"
+"  span.innerHTML = '&uarr;';\n"
+"  span.setAttribute('sortdir','up');\n"
+"  rows.reverse();\n"
+" } else {\n"
+"  span.innerHTML = '&darr;';\n"
+"  span.setAttribute('sortdir','down');\n"
+" }\n"
+" for (i=0;i<rows.length;i++)\n"
+"  table.tBodies[0].appendChild(rows[i]);\n"
+" prev_span = span;\n"
+"}\n"
+"\n"
+"function init_sort(init_sort_column, ascending) {\n"
+" var tables = document.getElementsByTagName(\"table\");\n"
+" for (var i = 0; i < tables.length; i++) {\n"
+"  var table = tables[i];\n"
+"  //var c = table.getAttribute(\"class\")\n"
+"  //if (-1 != c.split(\" \").indexOf(\"sort\")) {\n"
+"   var row = table.rows[0].cells;\n"
+"   for (var j = 0; j < row.length; j++) {\n"
+"    var n = row[j];\n"
+"    if (n.childNodes.length == 1 && n.childNodes[0].nodeType == 3) {\n"
+"     var link = document.createElement(\"a\");\n"
+"     var title = n.childNodes[0].nodeValue.replace(/:$/, \"\");\n"
+"     link.appendChild(document.createTextNode(title));\n"
+"     link.setAttribute(\"href\", \"#\");\n"
+"     link.setAttribute(\"class\", \"sortheader\");\n"
+"     link.setAttribute(\"onclick\", \"resort(this);return false;\");\n"
+"     var arrow = document.createElement(\"span\");\n"
+"     arrow.setAttribute(\"class\", \"sortarrow\");\n"
+"     arrow.appendChild(document.createTextNode(\":\"));\n"
+"     link.appendChild(arrow)\n"
+"     n.replaceChild(link, n.firstChild);\n"
+"    }\n"
+"   }\n"
+"   var lnk = row[init_sort_column].firstChild;\n"
+"   if (ascending) {\n"
+"    var span = lnk.childNodes[1];\n"
+"    span.setAttribute('sortdir','down');\n"
+"   }\n"
+"   resort(lnk);\n"
+"  //}\n"
+" }\n"
+"}\n"
+"\n"
+"init_sort(0, 0);\n"
+"\n"
+"// -->\n"
+"</script>\n"
+"\n"
+"</body>\n"
+"</html>" , mg_version_header);
   mg_send_http_chunk(nc, "", 0);
   /* TODO(rojer): Remove when cesanta/dev/issues/197 is fixed. */
   nc->flags |= MG_F_SEND_AND_CLOSE;

@@ -35,7 +35,7 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
     // Set original uri length to zero for default behaviour of
     // http serve
     c->orig_uri =  NULL;
-
+    
     // Now go through the mount points and 
     // redirect.
     QStringList mountPoints = (obj->m_MountPoints).keys();
@@ -46,20 +46,57 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
 	    auto len = bArray.size();
 
 	    if(!qstrncmp(uri , mnt, len)){
-		   // Now we want to change the uri in the http message
-		   // avoiding the mount point name because its 
-		   // just a pesudo
+	   // Now we want to change the uri in the http message
+	   // avoiding the mount point name because its 
+	   // just a pesudo
 		  
-		   // Before we override the original uri we need to 
-		   // store it in the connection struct for later use.
-		   c->orig_uri  = (char *)calloc(hm->uri.len + 1, sizeof(char));
+	   // Before we override the original uri we need to 
+	   // store it in the connection struct for later use.
+            
+           // We also need to avoid this step for KODI HTTP clients.
+           // Kodi seems to avoid listing of stuff which have absolute links.
+           // Don't know why, so we have to check if the user agent is Kodi,
+           // if so then we avoid making a absolute link.
+           // Obviously, this will not work when Kodi is not sending user-agents 
+           // but I've never seen a request from Kodi without a user-agent so
+           // it's our best bet.
+	   // Side Note: 
+	   // 	if c->orig_uri is NULL then the directory listing href simply list the contents
+	   // 	without the mount point.
+	   // 	(i.e) /Anime/Erased becomes /Erased
+	   //
+	   // 	This makes it impossible for browsers to go through but strangely, Kodi seems to go through
+	   // 	only when the link is in the above mentioned format.
+           bool isKodi = false;
+	   for(int i = 0; i < MG_MAX_HTTP_HEADERS ; ++i){
+                 mg_str name = hm->header_names[i];
+                 mg_str value = hm->header_values[i];
+                 if(name.len == 0){ /* indicates the last header in the list(citation needed). */
+                     break;
+                 }
+
+		 if(!qstrncmp(name.p , "User-Agent", name.len)){ // Only look for User-Agent
+			 if(strstr(value.p, "Kodi")){ // We just need Kodi in the user-agent
+				 isKodi = true;
+			 }else{
+				 break; // We have no business anymore.
+			 }
+		 }
+           }
+
+//	   if(isKodi){
+//		   qDebug() << "Kodi client detected, will be avoid using absolute href.";
+//	   }
+
+	   if(!isKodi){
+           c->orig_uri  = (char *)calloc(hm->uri.len + 1, sizeof(char));
 		   if(!c->orig_uri){
 			   mg_http_send_error(c, 500, NULL);
 			   free(uri);
 			   return;
 		   }
 		   strncpy(c->orig_uri, hm->uri.p, hm->uri.len);
-
+	   }
 		   if(hm->uri.len ==  len){ // No files directly requested 
 			memset(&hm->uri.p + 1 , 0, hm->uri.len - 1);
 			hm->uri.len = 1;
@@ -93,11 +130,14 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
 		   strncpy(root, localFileByteArray.constData(), localFileByteArray.size());
 		   
 		   opts.document_root = root;
-		   
+
+//		   qDebug() << "Serving Mount Point: " << root;
 		   mg_serve_http(c, hm , opts);
 		   mountPointServed = true;
-		   free(c->orig_uri);
-		   c->orig_uri = NULL;
+		   if(c->orig_uri){
+			   free(c->orig_uri);
+			   c->orig_uri = NULL;
+		   }
 		   free(root);
 		   break;
 	    }
@@ -105,7 +145,6 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
     }
 
     free(uri);
-
     if(!mountPointServed){
 	    QFile file;
 	    file.setFileName(":/index_a.html");
@@ -141,7 +180,6 @@ static void ev_handler(struct mg_connection *c, int ev, void *p) {
 		    mg_printf(c, "%.*s", data.size(), data.constData());
 	    }
 	    file.close();
-
 	    c->flags |= MG_F_SEND_AND_CLOSE;
     }
   }

@@ -31,17 +31,9 @@ GridLayout {
 				Image {
 					cache: true
 					fillMode: Image.PreserveAspectFit
-					Layout.preferredWidth: 145
-					Layout.preferredHeight: 145
+					Layout.preferredWidth: 175
+					Layout.preferredHeight: 175
 					source: "qrc:/logo.png"
-				}
-				Image {
-					Layout.alignment: Qt.AlignHCenter
-					cache: true
-					fillMode: Image.PreserveAspectFit
-					Layout.preferredWidth: 136
-					Layout.preferredHeight: 68
-					source: "qrc:/gplv3.png"
 				}
 
 		}
@@ -51,9 +43,9 @@ GridLayout {
 			Layout.preferredWidth: parent.width - 100
 			horizontalAlignment: Qt.AlignHCenter
 			verticalAlignment: Qt.AlignTop
-			text: qsTr("This program is licensed under GNU General Public License.<br>") +
+			text: qsTr("This program is licensed under GNU General Public License V2.<br>") +
 			      qsTr("Copyright \u00A9 Antony Jr.<br>") +
-			      qsTr("All Icons(except GPL logo) by <a href=https://icons8.com>Icons8</a>.<br>")
+			      qsTr("All Icons by <a href=https://icons8.com>Icons8</a>.<br>")
 			font.pixelSize: 18
 			wrapMode: Text.WordWrap
 			textFormat: Text.RichText

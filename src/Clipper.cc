@@ -3,18 +3,17 @@
 #include <QApplication>
 
 Clipper::Clipper(QObject *parent) :
-    QObject(parent)
-{
+    QObject(parent) {
 }
 
-Clipper::~Clipper(){
+Clipper::~Clipper() {
 }
 
-void Clipper::clip(QString content){
-	QClipboard *clipboard = QApplication::clipboard();
-	if(!clipboard){
-		return;
-	}
-	clipboard->setText(content);
-	emit clipped();
+void Clipper::clip(QString content) {
+    QClipboard *clipboard = QApplication::clipboard();
+    if(!clipboard) {
+        return;
+    }
+    clipboard->setText(content);
+    emit clipped();
 }
